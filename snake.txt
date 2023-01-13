@@ -1,0 +1,188 @@
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+
+using namespace std;
+
+bool gameOver;                                                          // dopóki warunek nie jest spełniony gra cały czas leci
+
+const int width = 40;                                                   //zdefiniowanie wielkości planszy
+const int height = 20;
+int x, y, fruitX, fruitY, score;                                        // zmienne
+int tailX[100], tailY[100];
+int nTail;
+enum kierunek{ STOP, LEFT, RIGHT, UP, DOWN };                           // aby utrzymac kierunek węż a nie klikać cały czas
+kierunek kier;  
+                                                        // przypisanie do zmiennej
+
+
+
+// wgrywanie początkowych ustawień
+void ustawienia() {
+    gameOver = false;
+    kier = STOP; //dopoki się nie ruszczymy wąż bedzie stał w miejscu
+    // dzielone na 2 aby głowa węża byłą na środku
+    x = width / 2;
+    y = height /2;
+    //losowe miejsca owocków modulo po to by zmeściło się w wyznaczonej strefie
+    fruitX = rand() % width; 
+    fruitY = rand() % height;
+    score = 0;
+   
+}
+void rysowanie() {
+
+    system("cls");//czyszczenie obrazu
+
+    for (int i = -2; i < width; i++)
+    {
+        cout << "X";
+    }
+        cout << endl;
+    
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            if (j == 0)
+            {
+                cout << "X";
+                
+            }
+            if (i == y && j == x)
+            {
+                cout << "@";
+                
+            }
+            else if (i == fruitY && j == fruitX)
+            {     
+                cout << "o";
+
+            }
+            else
+            {
+                bool print = false;
+                for (int k = 0; k < nTail; k++)
+                {
+                    if (tailX[k] == j && tailY[k] == i)
+                    {
+                        cout << "#";
+                        print = true;
+                    }
+                  
+                }
+                if (!print)
+                {
+                    cout << " ";
+                }
+                
+            }
+      
+            if (j == width - 1)
+            {
+                cout << "X";
+            }
+            
+        }
+        cout << endl;
+    }
+    for (int i = -2; i < width; i++)
+    {
+        cout << "X";
+    }
+
+}
+void input() {
+
+    if (_kbhit())
+    {
+        switch (_getch())
+        {
+            
+        case 72: 
+            kier = DOWN;        //strzałka w dół
+            break;
+        case 80: 
+            kier = UP;        //strzałka w góre
+            break;
+        case 75:  
+            kier = LEFT;        //strzałka w lewo
+            break;
+        case 77:  
+            kier = RIGHT;        //strzałka w prawo
+            break;
+        case 0:
+            gameOver = true;
+            break;
+        }
+    }
+    cout << endl;
+    cout << "Wynik: " << score <<endl;
+}
+void logika() {
+
+    int prevX = tailX[0];
+    int prevY = tailY[0];
+    int prev2X, prev2Y;
+    tailX[0] = x;
+    tailY[0] = y;
+    for (int i = 1; i < nTail; i++)
+    {
+        prev2X = tailX[i];
+        prev2Y = tailY[i];
+        tailX[i] = prevX;
+        tailY[i] = prevY;
+        prevX = prev2X;
+        prevY = prev2Y;
+    }
+
+    switch(kier)
+    {
+    case LEFT: x--;
+        break;
+    case RIGHT: x++;
+        break;
+    case UP: y++;
+        break;
+    case DOWN: y--;
+        break;
+    }
+    if (x > width || x < 0 || y > height || y < 0)
+    {
+       gameOver = true;
+    }
+    for (int i = 0; i < nTail; i++)
+    {
+        if(tailX[i] == x && tailY[i] == y)
+        {
+            gameOver = true;
+        }
+    }
+    if (x == fruitX && y == fruitY)
+    {
+        score += 1; 
+        fruitX = rand() % width;
+        fruitY = rand() % height;
+        nTail++;
+
+    }
+}
+
+int main()
+{
+    
+    ustawienia();
+    
+        while (!gameOver)
+        {
+            
+            rysowanie();
+                input();
+                logika();
+                Sleep(100);
+        } 
+        
+
+        return 0;
+}
+
